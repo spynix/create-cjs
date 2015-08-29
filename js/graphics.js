@@ -7,7 +7,7 @@ tetris.world.board = tetris.world.board || {};
 tetris.world.board.matrix = tetris.world.board.matrix || [];
 
 tetris.world.preview = tetris.world.preview || {};
-tetris.world.scoreboard = tetris.world.preview || {};
+tetris.world.scoreboard = tetris.world.scoreboard || {};
 
 tetris.graphics = tetris.graphics || {};
 
@@ -426,10 +426,17 @@ Tetrimino.prototype.check_collisions = function(direction) {
       
       sum = this.matrix_sum(mm.matrix, against);
       
-      for (i = 0, j = sum.length; i < j; i++)
-        for (k = 0, k = sum[i].length; k < l; k++)
-          if (sum[i][k] >= 2)
+      for (i = 0, j = sum.length; i < j; i++) {
+        if (result != 0)
+          break;
+        
+        for (k = 0, k = sum[i].length; k < l; k++) {
+          if (sum[i][k] >= 2) {
             result = 1;
+            break;
+          }
+        }
+      }
     }
   } else if (direction == RIGHT) {
     if ((column + 1 + mm.width) > (tetris.world.board.matrix[0].length)) { /* would take us to the right of the board */
@@ -448,10 +455,17 @@ Tetrimino.prototype.check_collisions = function(direction) {
       
       sum = this.matrix_sum(mm.matrix, against);
       
-      for (i = 0, j = sum.length; i < j; i++)
-        for (k = 0, k = sum[i].length; k < l; k++)
-          if (sum[i][k] >= 2)
+      for (i = 0, j = sum.length; i < j; i++) {
+        if (result != 0)
+          break;
+        
+        for (k = 0, k = sum[i].length; k < l; k++) {
+          if (sum[i][k] >= 2) {
             result = 1;
+            break;
+          }
+        }
+      }
     }
   } else if (direction == DOWN) {
     if ((row + 1 + mm.height) > tetris.world.board.matrix.length) { /* would take us below the board */
@@ -470,16 +484,23 @@ Tetrimino.prototype.check_collisions = function(direction) {
       
       sum = this.matrix_sum(mm.matrix, against);
       
-      for (i = 0, j = sum.length; i < j; i++)
-        for (k = 0, k = sum[i].length; k < l; k++)
-          if (sum[i][k] >= 2)
+      for (i = 0, j = sum.length; i < j; i++) {
+        if (result != 0)
+          break;
+        
+        for (k = 0, k = sum[i].length; k < l; k++) {
+          if (sum[i][k] >= 2) {
             result = 2;
+            break;
+          }
+        }
+      }
     }
   } else { /* shit went haywire and we're trying a direction we shouldnt (most likely up) */
     if (tetris.debug.graphics)
       console.log("  Tetriminos->check_collisions(" + directions[direction] + "): unhandled direction");
     
-    result = 1;
+    result = 1; /* this will keep us from moving anywhere, but not do anything else */
   }
   
   return result;
@@ -673,9 +694,7 @@ tetris.init_scoreboard = function() {
   
   tetris.world.scoreboard.container.x = 416;
   tetris.world.scoreboard.container.y = 46;
-  
-  tetris.stage.addChild(tetris.world.scoreboard.container);
-  
+
   tetris.world.scoreboard.score = new createjs.Text("Score: 000,000", "bold 20px Tahoma", "#80c080");
   tetris.world.scoreboard.score.textBaseline = "alphabetic";
   
@@ -690,6 +709,8 @@ tetris.init_scoreboard = function() {
   tetris.world.scoreboard.container.addChild(tetris.world.scoreboard.score);
   tetris.world.scoreboard.container.addChild(tetris.world.scoreboard.highscore);
   tetris.world.scoreboard.container.addChild(tetris.world.scoreboard.level);
+  
+  tetris.stage.addChild(tetris.world.scoreboard.container);
 };
 
 
