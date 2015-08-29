@@ -1,0 +1,155 @@
+@charset "utf-8";
+
+* {
+  font-family: Tahoma, sans-serif;
+}
+
+body {
+  background-color: #505060;
+}
+
+.main {
+  margin: 4px auto;
+  border: 1px solid #000000;
+  width: 600px;
+  height: 528px;
+}
+
+.main > canvas {
+  width: 600px;
+  height: 528px;
+}
+
+.sound {
+  display: block;
+  margin: 0px auto;
+  padding: 0px 0px;
+  text-align: center;
+  margin-left: auto;
+  margin-right: auto;
+  width: 600px;
+}
+
+.control > button {
+  width: 80px;
+  text-align: center;
+}
+
+.sound .row {
+  width: 100%;
+  margin: 4px 0px;
+  display: inline-block;
+}
+
+.sound .row:after {
+  content: " ";
+  display: block;
+  visibility: hidden;
+  clear: both;
+  font-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+  height: 0;
+}
+
+.sound .row.header {
+  height: 32px;
+  line-height: 31px;
+  background-color: #606080;
+}
+
+.sound .row .hr {
+  width: 100%;
+  height: 1px;
+  background-color: #000000;
+}
+
+.sound .row .control {
+  width: 84px;
+  margin-left: auto;
+  margin-right: auto;
+  float: left;
+  display: inline-block;
+}
+
+.sound .row .control:after {
+  content: " ";
+  display: block;
+  visibility: hidden;
+  clear: both;
+  font-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+  height: 0;
+}
+
+.sound .row.header .control {
+  /*  text-shadow: 2px 2px 3px #000000; */
+}
+
+.sounds_status:before {
+  color: #000000;
+  content: "Audio: ";
+}
+
+.sounds_status {
+  float: right;
+  display: inline-block;
+  color: #ff6060;
+  padding: 0 4px;
+}
+
+.sounds_status:after {
+  content: " ";
+  display: block;
+  visibility: hidden;
+  clear: both;
+  font-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+  height: 0;
+}
+
+.graphics_status:before {
+  color: #000000;
+  content: "GFX: ";
+}
+
+.graphics_status {
+  float: right;
+  display: inline-block;
+  color: #ff6060;
+  padding: 0 4px;
+}
+
+.graphics_status:after {
+  content: " ";
+  display: block;
+  visibility: hidden;
+  clear: both;
+  font-size: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+  line-height: 0;
+  height: 0;
+}
+
+.description {
+  margin: 4px auto;
+  border: 1px solid #000000;
+  width: 590px;
+  background-color: #606080;
+  font-size: 16px;
+  padding: 4px;
+}
+
+.description p {
+  padding: 4px auto;
+}

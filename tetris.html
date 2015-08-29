@@ -1,0 +1,76 @@
+<html>
+  <head>
+    <title>Tetris</title>
+    <link href="css/tetris.css" rel="stylesheet" />
+    <script src="js/jquery-2.1.4.min.js" type="text/javascript"></script>
+    <script src="js/createjs-2015.05.21.min.js" type="text/javascript"></script>
+    
+    <script src="js/utils.js" type="text/javascript"></script>
+    <script src="js/constants.js" type="text/javascript"></script>
+    <script src="js/audio.js" type="text/javascript"></script>
+    <script src="js/graphics.js" type="text/javascript"></script>
+    <script src="js/controls.js" type="text/javascript"></script>
+    <script src="js/init.js" type="text/javascript"></script>
+    <script src="js/game.js" type="text/javascript"></script>
+  </head>
+  <body>
+    <div class="main">
+      <canvas id="tetris_canvas" width="600" height="528">
+        Your browser does not have support for a canvas object.
+      </canvas>
+    </div>
+    <div class="sound">
+      <div class="row header">
+        <div class="control">Type A</div>
+        <div class="control">Type B</div>
+        <div class="control">Type C</div>
+        <div class="control">Nyan Cat</div>
+        <div class="sounds_status">&cross;</div>
+        <div class="graphics_status">&cross;</div>
+      </div>
+      <div class="row">
+        <div class="hr"></div>
+      </div>
+      <div class="row">
+        <div class="control"><button id="play_bg_a_original">Original</button></div>
+        <div class="control"><button id="play_bg_b_original">Original</button></div>
+        <div class="control"><button id="play_bg_c_original">Original</button></div>
+        <div class="control"><button id="play_bg_nyan_original">Original</button></div>
+        <div class="control"><button id="stop_sounds">Stop</button></div>
+      </div>
+      <div class="row">
+        <div class="control"><button id="play_bg_a_sonicade">Sonicade</button></div>
+        <div class="control">&nbsp;</div>
+        <div class="control">&nbsp;</div>
+        <div class="control"><button id="play_bg_nyan_bobgmbh">BobGmbH</button></div>
+      </div>
+      <div class="row">
+        <div class="control"><button id="play_bg_a_bobgmbh">BobGmbH</button></div>
+      </div>
+      <div class="row">
+        <div class="control"><button id="play_bg_a_unknown_1">Unknown</button></div>
+      </div>
+    </div>
+    
+    <div class="devcontrols">
+      <button id="test1">Test 1</button>
+      <button id="test2">Test 2</button>
+      <button id="test3">Test 3</button>
+    </div>
+    
+    <div class="description">
+      Controls:<br />
+      <p>
+        Up/Right/Down/Left Arrows: Move the Tetrimino<br />
+        W/S/A/D: Move the Tetrimino<br />
+        <br />
+        Pause Break: Pause the game<br />
+        <br />
+        N: New game<br />
+      </p>
+    </div>
+    
+    <div class="errors">
+    </div>
+  </body>
+</html>
