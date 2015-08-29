@@ -18,7 +18,8 @@ var kb = Object.freeze({
   w: 87,
   s: 83,
   a: 65,
-  d: 68
+  d: 68,
+  n: 78
 });
 
 
@@ -106,7 +107,7 @@ tetris.controls.up = function(press) {
     if (tetris.debug.controls)
       console.log("KEYDOWN: Up Arrow");
     
-    tetris.world.board.move(UP);
+    tetris.world.board.rotate(true);
   } else {
     tetris.controls.pressing.up = false;
     
@@ -210,6 +211,21 @@ tetris.controls.d = function(press) {
 };
 
 
+tetris.controls.n = function(press) {
+  if (press) {
+    tetris.controls.pressing.n = true;
+    
+    if (tetris.debug.controls)
+      console.log("KEYDOWN: N");
+  } else {
+    tetris.controls.pressing.n = false;
+    
+    if (tetris.debug.controls)
+      console.log("KEYUP: N");
+  }
+};
+
+
 tetris.controls.press = function(key) {
   switch (key) {
     case kb.enter:
@@ -248,7 +264,8 @@ tetris.controls.press = function(key) {
     case kb.d:
       tetris.controls.d(true);
       break;
-      break;
+    case kb.n:
+      tetris.controls.n(true);
     default:
       break;
   }
@@ -293,6 +310,8 @@ tetris.controls.release = function(key) {
     case kb.d:
       tetris.controls.d(false);
       break;
+    case kb.n:
+      tetris.controls.n(false);
       break;
     default:
       break;
@@ -302,6 +321,9 @@ tetris.controls.release = function(key) {
 
 tetris.keyboard_binds = function() {
   $(document).on("keydown", function(event) {
+//    if (tetris.debug.controls)
+//      console.log("keydown: " + event.which);
+    
     switch (event.which) {
       case kb.enter:
       case kb.pausebreak:
@@ -315,6 +337,7 @@ tetris.keyboard_binds = function() {
       case kb.s:
       case kb.a:
       case kb.d:
+      case kb.n:
         event.preventDefault();
         tetris.controls.press(event.which);
         break;
@@ -337,6 +360,7 @@ tetris.keyboard_binds = function() {
       case kb.s:
       case kb.a:
       case kb.d:
+      case kb.n:
         event.preventDefault();
         tetris.controls.release(event.which);
         break;
@@ -459,144 +483,28 @@ tetris.sound_binds = function() {
 };
 
 
-function test1() {
-  var rand = Math.floor((Math.random() * 7));
-  var temp, config;
-
-  switch (rand) {
-    case 0:
-      config = tetriminos.i;
-
-      break;
-    case 1:
-      config = tetriminos.j;
-
-      break;
-    case 2:
-      config = tetriminos.l;
-
-      break;
-    case 3:
-      config = tetriminos.o;
-
-      break;
-    case 4:
-      config = tetriminos.s;
-
-      break;
-    case 5:
-      config = tetriminos.t;
-
-      break;
-    case 6:
-      config = tetriminos.z;
-
-      break;
-    default:
-      config = tetriminos.i;
-
-      break;
-  }
-
-  temp = new Tetrimino(config);
-  temp.rotate(false);
-}
-
-
 function test2() {
-  var rand = Math.floor((Math.random() * 7));
-  var config;
-
-  switch (rand) {
-    case 0:
-      config = tetriminos.i;
-
-      break;
-    case 1:
-      config = tetriminos.j;
-
-      break;
-    case 2:
-      config = tetriminos.l;
-
-      break;
-    case 3:
-      config = tetriminos.o;
-
-      break;
-    case 4:
-      config = tetriminos.s;
-
-      break;
-    case 5:
-      config = tetriminos.t;
-
-      break;
-    case 6:
-      config = tetriminos.z;
-
-      break;
-    default:
-      config = tetriminos.i;
-
-      break;
-  }
+  var rand = rng.between(0, 6);
   
   if (tetris.world.board.current) {
     tetris.world.board.current.remove();
     delete tetris.world.board.current;
   }
     
-  tetris.world.board.current = new Tetrimino(config, tetris.world.board.container);
-  tetris.world.board.current.goto(0, 0);
+  tetris.world.board.current = new Tetrimino(tetriminos[rand], tetris.world.board.container);
+  tetris.world.board.current.goto(0, 4);
   tetris.world.board.current.show();
 }
 
 function test3() {
-  var rand = Math.floor((Math.random() * 7));
-  var config;
-
-  switch (rand) {
-    case 0:
-      config = tetriminos.i;
-
-      break;
-    case 1:
-      config = tetriminos.j;
-
-      break;
-    case 2:
-      config = tetriminos.l;
-
-      break;
-    case 3:
-      config = tetriminos.o;
-
-      break;
-    case 4:
-      config = tetriminos.s;
-
-      break;
-    case 5:
-      config = tetriminos.t;
-
-      break;
-    case 6:
-      config = tetriminos.z;
-
-      break;
-    default:
-      config = tetriminos.i;
-
-      break;
-  }
+  var rand = rng.between(0, 6);
   
   if (tetris.world.preview.current) {
     tetris.world.preview.current.remove();
     delete tetris.world.preview.current;
   }
-    
-  tetris.world.preview.current = new Tetrimino(config, tetris.world.preview.container);
+
+  tetris.world.preview.current = new Tetrimino(tetriminos[rand], tetris.world.preview.container);
   tetris.world.preview.align();
   tetris.world.preview.current.show();
 }
