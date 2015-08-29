@@ -9,3 +9,6 @@ function log_matrix(matrix) {
     
   console.log(str);
 }
+
+
+window.rng = new MersenneTwister();
