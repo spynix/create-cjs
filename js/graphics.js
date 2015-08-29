@@ -161,21 +161,24 @@ Tetrimino.prototype.remove = function() {
 Tetrimino.prototype.rotate_matrix = function(clockwise) {
   var n = this.matrix_size;
   var d = Math.floor(n / 2);
-  var str = '';
   var x, y, temp;
   
-  if (tetris.debug.graphics) {
-    console.log("Before matrix rotation (n=" + n + ", d=" + d + "):");
-    
-    str = '';
-
-    for (x = 0; x < n; x++)
-      str += ("  " + this.matrix[x].toString()).split(", ").join(" ") + "\r\n";
-
-    console.log(str);
+  if (tetris.debug.math) {
+    console.log("Tetrimino->rotate_matrix(" + (clockwise ? "clockwise" : "counter-clockwise") + "):");
+    console.log("  Before matrix rotation (n=" + n + ", d=" + d + "):");
+    log_matrix(this.matrix);
   }
   
   if (clockwise) {
+    for (x = 0; x < d; x++) {
+      for (y = 0; y < (n - d); y++) {
+        temp                              = this.matrix[x][y];
+        this.matrix[x][y]                 = this.matrix[n - 1 - y][x];
+        this.matrix[n - 1 - y][x]         = this.matrix[n - 1 - x][n - 1 - y];
+        this.matrix[n - 1 - x][n - 1 - y] = this.matrix[y][n - 1 - x];
+        this.matrix[y][n - 1 - x]         = temp;
+      }
+    }
   } else {
     for (x = 0; x < d; x++) {
       for (y = 0; y < (n - d); y++) {
@@ -188,23 +191,44 @@ Tetrimino.prototype.rotate_matrix = function(clockwise) {
     }
   }
   
-  if (tetris.debug.graphics) {
-    console.log("After matrix rotation:");
-    
-    str = '';
-
-    for (x = 0; x < n; x++)
-      str += ("  " + this.matrix[x].toString()).split(", ").join(" ") + "\r\n";
-
-    console.log(str);
+  if (tetris.debug.math) {
+    console.log("  After matrix rotation:");
+    log_matrix(this.matrix);
   }
 };
 
 
+Tetrimino.prototype.can_rotate = function() {
+  return this.check_collisions(ROTATE);
+};
+
+
+/* rotate():
+ * 
+ */
 Tetrimino.prototype.rotate = function(clockwise) {
+  var i, j, n;
+  
   this.rotate_matrix(clockwise);
   
-  /* do shit after matrix rotation */
+  if (this.can_rotate() != 0) {
+    tetris.sound_play("woosh");
+    this.rotate_matrix(!clockwise);
+    return false;
+  }
+
+  n = 0;
+
+  for (i = 0; i < this.matrix_size; i++) {
+    for (j = 0; j < this.matrix_size; j++) {
+      if (this.matrix[i][j] == 1) {
+        this.blocks[n].set_position(j * 24, i * 24);
+        n++;
+      }
+    }
+  }
+  
+  tetris.stage.update();
 };
 
 
@@ -220,8 +244,8 @@ Tetrimino.prototype.set_position = function(x, y) {
 
 
 Tetrimino.prototype.goto = function(row, column) {
-  this.row = Math.max(0, Math.min(19, row));
-  this.column = Math.max(0, Math.min(9, column));
+  this.row = Math.max(-3, Math.min(19, row));
+  this.column = Math.max(-3, Math.min(9, column));
   
   this.set_position(this.column * 24, this.row * 24);
   
@@ -427,19 +451,19 @@ Tetrimino.prototype.check_collisions = function(direction) {
       sum = this.matrix_sum(mm.matrix, against);
       
       for (i = 0, j = sum.length; i < j; i++) {
-        if (result != 0)
-          break;
-        
         for (k = 0, k = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 1;
             break;
           }
         }
+        
+        if (result != 0)
+          break;
       }
     }
   } else if (direction == RIGHT) {
-    if ((column + 1 + mm.width) > (tetris.world.board.matrix[0].length)) { /* would take us to the right of the board */
+    if ((column + 1 + mm.width) > tetris.world.board.matrix[0].length) { /* would take us to the right of the board */
       if (tetris.debug.graphics)
         console.log("  Tetrimino->check_collisions(" + directions[direction] + "): collision with board detected");
       
@@ -456,15 +480,15 @@ Tetrimino.prototype.check_collisions = function(direction) {
       sum = this.matrix_sum(mm.matrix, against);
       
       for (i = 0, j = sum.length; i < j; i++) {
-        if (result != 0)
-          break;
-        
         for (k = 0, k = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 1;
             break;
           }
         }
+        
+        if (result != 0)
+          break;
       }
     }
   } else if (direction == DOWN) {
@@ -485,18 +509,47 @@ Tetrimino.prototype.check_collisions = function(direction) {
       sum = this.matrix_sum(mm.matrix, against);
       
       for (i = 0, j = sum.length; i < j; i++) {
-        if (result != 0)
-          break;
-        
         for (k = 0, k = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 2;
             break;
           }
         }
+        
+        if (result != 0)
+          break;
       }
     }
-  } else { /* shit went haywire and we're trying a direction we shouldnt (most likely up) */
+  } else if (direction == ROTATE) {
+    if ((column < 0) || ((column + mm.width) > tetris.world.board.matrix[0].length) || ((row + mm.height) > tetris.world.board.matrix.length)) {
+      if (tetris.debug.graphics)
+        console.log("  Tetrimino->check_collisions(" + directions[direction] + "): collision with board detected");
+      
+      result = 1;
+    } else {
+      for (i = row, j = (row + mm.height); i < j; i++)
+        against.push(tetris.world.board.matrix[i].slice(column, column + mm.width));
+      
+      if (tetris.debug.graphics) {
+        console.log("Comparison matrix:");
+        log_matrix(against);
+      }
+      
+      sum = this.matrix_sum(mm.matrix, against);
+      
+      for (i = 0, j = sum.length; i < j; i++) {
+        for (k = 0, k = sum[i].length; k < l; k++) {
+          if (sum[i][k] >= 2) {
+            result = 2;
+            break;
+          }
+        }
+        
+        if (result != 0)
+          break;
+      }
+    }
+  } else { /* shit went haywire and we're trying a direction we shouldnt */
     if (tetris.debug.graphics)
       console.log("  Tetriminos->check_collisions(" + directions[direction] + "): unhandled direction");
     
@@ -527,8 +580,10 @@ Tetrimino.prototype.move = function(direction) {
   if (tetris.debug.controls)
     console.log("  Tetrimino->move(" + directions[direction] + ")");
   
-  if (this.can_move(direction) != 0)
+  if (this.can_move(direction) != 0) {
+    tetris.sound_play("woosh");
     return false;
+  }
   
   switch (direction) {
     case UP:
@@ -548,6 +603,13 @@ Tetrimino.prototype.move = function(direction) {
   }
   
   tetris.stage.update();
+};
+
+tetris.world.board.rotate = function(clockwise) {
+  if (!tetris.world.board.current || !tetris.world.board.current.visible)
+    return false;
+  
+  tetris.world.board.current.rotate(clockwise);
 };
 
 tetris.world.board.move = function(direction) {
