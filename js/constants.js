@@ -5,7 +5,9 @@ var tetris = tetris || {};
 tetris.debug = tetris.debug || {};
 tetris.debug.audio = tetris.debug.audio || false;
 tetris.debug.graphics = tetris.debug.graphics || true;
-tetris.debug.controls = tetris.debug.controls || true;
+tetris.debug.controls = tetris.debug.controls || false;
+tetris.debug.math = tetris.debug.math || false;
+
 
 tetris.config = tetris.config || {};
 
@@ -35,7 +37,8 @@ var sounds = [
   "bg-b-1",
   "bg-c-1",
   "bg-nyan-1",
-  "bg-nyan-2"
+  "bg-nyan-2",
+  "woosh"
 ];
 
 
@@ -49,8 +52,9 @@ var graphics = [
 ];
 
 
-var tetriminos = Object.freeze({
-  i: {
+var tetriminos = Object.freeze([
+  {
+    name: "i",
     type: 0,
     size: 4,
     matrix: [
@@ -61,7 +65,8 @@ var tetriminos = Object.freeze({
     ]
   },
   
-  j: {
+  {
+    name: "j",
     type: 1,
     size: 3,
     matrix: [
@@ -71,7 +76,8 @@ var tetriminos = Object.freeze({
     ]
   },
   
-  l: {
+  {
+    name: "l",
     type: 2,
     size: 3,
     matrix: [
@@ -81,7 +87,8 @@ var tetriminos = Object.freeze({
     ]
   },
   
-  o: {
+  {
+    name: "o",
     type: 3,
     size: 2,
     matrix: [
@@ -90,7 +97,8 @@ var tetriminos = Object.freeze({
     ]
   },
   
-  s: {
+  {
+    name: "s",
     type: 4,
     size: 3,
     matrix: [
@@ -100,7 +108,8 @@ var tetriminos = Object.freeze({
     ]
   },
   
-  t: {
+  {
+    name: "t",
     type: 5,
     size: 3,
     matrix: [
@@ -110,7 +119,8 @@ var tetriminos = Object.freeze({
     ]
   },
   
-  z: {
+  {
+    name: "z",
     type: 6,
     size: 3,
     matrix: [
@@ -119,19 +129,21 @@ var tetriminos = Object.freeze({
       [1, 0, 0]
     ]
   }
-});
+]);
 
 
-var UP    = 0;
-var RIGHT = 1;
-var DOWN  = 2;
-var LEFT  = 3;
+var UP     = 0;
+var RIGHT  = 1;
+var DOWN   = 2;
+var LEFT   = 3;
+var ROTATE = 4;
 
 var directions = [
   "up",
   "right",
   "down",
-  "left"
+  "left",
+  "rotate"
 ];
 
 var points = [
