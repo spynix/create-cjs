@@ -4,7 +4,7 @@ var tetris = tetris || {};
 
 tetris.world = tetris.world || {};
 tetris.world.board = tetris.world.board || {};
-tetris.world.board.matrix = tetris.world.board.matrix || [];
+tetris.world.board.matrix = tetris.world.board.matrix || []; /* defined in constants.js */
 
 tetris.world.preview = tetris.world.preview || {};
 tetris.world.scoreboard = tetris.world.scoreboard || {};
@@ -22,6 +22,8 @@ function Block(image, container) {
   
   this.x = 0;
   this.y = 0;
+  this.row = 0;
+  this.column = 0;
   this.visible = false;
 }
 
@@ -45,6 +47,8 @@ Block.prototype.remove = function() {
   this.container = null;
   this.x = null;
   this.y = null;
+  this.row = null;
+  this.column = null;
   this.visible = null;
 };
 
@@ -52,7 +56,9 @@ Block.prototype.remove = function() {
 Block.prototype.get_position = function() {
   return {
     x: this.x,
-    y: this.y
+    y: this.y,
+    row: this.row,
+    column: this.column
   };
 };
 
@@ -63,6 +69,9 @@ Block.prototype.set_position = function(x, y) {
   
   this.image.x = x;
   this.image.y = y;
+  
+  this.row = Math.floor(y / 24);
+  this.column = Math.floor(x / 24);
 };
 
 
@@ -211,6 +220,9 @@ Tetrimino.prototype.rotate = function(clockwise) {
   
   this.rotate_matrix(clockwise);
   
+  /* we don't actually want a failed rotation to cause a true collision which
+   * would result in the tetrimino being added to the board
+   */
   if (this.can_rotate() != 0) {
     tetris.sound_play("woosh");
     this.rotate_matrix(!clockwise);
@@ -243,6 +255,15 @@ Tetrimino.prototype.set_position = function(x, y) {
 };
 
 
+/* goto():
+ *   currently tetrimino matrices default to the lowest size's square matrix
+ *   that can contain the arrangement.  meaning: the i tetrimino is 4x4, o is
+ *   2x2, and the rest are 3x3.
+ *   
+ *   so the most extra column's you'd need to account for is 3, since the matrix
+ *   will have "at least" a block in the far right column, or more likely
+ *   further left
+ */
 Tetrimino.prototype.goto = function(row, column) {
   this.row = Math.max(-3, Math.min(19, row));
   this.column = Math.max(-3, Math.min(9, column));
@@ -253,154 +274,16 @@ Tetrimino.prototype.goto = function(row, column) {
 };
 
 
-/* matrix_minize():
- *   returns a matrix that removes 0 pads
- * 
- *   assumes square matrix (n * n)
- */
-Tetrimino.prototype.matrix_minimize = function(input) {
-  var output = [];
-  var offset_col_left, offset_col_right, offset_row_top, offset_row_bottom;
-  var i, j, k, l, n, sum;
-  
-  offset_col_left = input[0].length + 1;
-  offset_col_right = -1;
-  
-  /* not used in the same way as col_left/right */
-  offset_row_top = 0;
-  offset_row_bottom = 0;
-
-  /* this acquires the matrix's left and right pads */
-  for (i = 0, j = input.length; i < j; i++) {
-    for (k = 0, l = input[i].length; k < l; k++) {
-      if (input[i][k] == 1) {
-        if (k < offset_col_left)
-          offset_col_left = k;
-        
-        if (k > offset_col_right)
-          offset_col_right = k;
-      }
-    }
-  }
-  
-  if (tetris.debug.graphics) {
-    console.log("  input matrix:");
-    log_matrix(input);
-  }
-  
-  /* assign the left/right clipped matrix to output.  also remember you need
-   * the right offset to be negative to subtract from the end of the array
-   */
-  for (i = 0, j = input.length; i < j; i++)
-    output.push(input[i].slice(offset_col_left, offset_col_right + 1));
-  
-  if (tetris.debug.graphics) {
-    console.log("  output matrix (after left and right padding removed):");
-    log_matrix(output);
-  }
-  
-  n = 0;
-  
-  for (i = 0, j = input.length; i < l; i++) {
-    sum = 0;
-    
-    for (k = 0, l = input[i].length; k < l; k++)
-      sum += input[i][k];
-    
-    if (sum == 0)
-      n++;
-    else
-      break;
-  }
-
-  offset_row_top = n;
-  
-  /* n equals number of rows that need splicing off the front */
-  if (n >= 1)
-    output.splice(0, n);
-  
-  if (tetris.debug.graphics) {
-    console.log("  output matrix (after top padding removed):");
-    log_matrix(output);
-  }
-  
-  n = 0;
-
-  /* handle bottom padding */
-  for (i = input.length - 1, j = 0; i >= j; i--) {
-    sum = 0;
-    
-    for (k = 0, l = input[i].length; k < l; k++)
-      sum += input[i][k];
-    
-    if (sum == 0)
-      n++;
-    else
-      break;
-  }
-
-  offset_row_bottom = n;
-  
-  /* we ended on a row with a 1, so don't splice that row, just the ones after it */
-  if (n >= 1)
-    output.splice(-n, n);
-  
-  if (tetris.debug.graphics) {
-    console.log("  output matrix (after bottom padding removed):");
-    log_matrix(output);
-  }
-  
-  if (tetris.debug.graphics) {
-    console.log("  Tetrimino->matrix_minize():");
-    console.log("    offset_col_left: " + offset_col_left.toString());
-    console.log("    offset_col_right: " + offset_col_right.toString());
-    console.log("    offset_row_top: " + offset_row_top.toString());
-    console.log("    offset_row_bottom: " + offset_row_bottom.toString());
-  }
-
-  /* 0 pads should be removed now, so return an object that contains the matrix
-   * and associated offsets.  this is kind of a jackass way of doing it, but i
-   * think it'll make future calculations a little easier
-   */
-  return {
-    matrix: output,
-    top: offset_row_top,
-    bottom: offset_row_bottom,
-    left: offset_col_left,
-    right: offset_col_right,
-    width: output[0].length,
-    height: output.length
-  };
-};
-
-
-/* matrix_sum():
- *   returns the summation of ONLY TWO matrices.  ie, simple matrix addition
- *   
- *   assumes both matrices have identical dimensions
- */
-Tetrimino.prototype.matrix_sum = function(one, two) {
-  var output = [];
-  var i, j, k, l;
-  
-  for (i = 0, j = one.length; i < j; i++) {
-    output.push([]);
-    
-    for (k = 0, l = one[i].length; k < l; k++)
-      output[i].push(one[i][k] + two[i][k]);
-  }
-  
-  return output;
-};
-
-
 /* collide():
  *   called whenever a tetrimino collides on the BOTTOM (downward motion).  this
- *   will in turn result in the tetrimino being added to the 
+ *   will in turn result in the tetrimino being added to the board
  * 
  */
 Tetrimino.prototype.collide = function() {
-
+  tetris.collided = true;
+  
+  if (tetris.debug.graphics)
+    console.log("Tetrmino->collide(): true");
 };
 
 
@@ -423,19 +306,19 @@ Tetrimino.prototype.check_collisions = function(direction) {
   var mm = [];
   var i, j, k, l, row, column, sum;
   
-  mm = this.matrix_minimize(this.matrix);
+  mm = matrix_minimize(this.matrix);
   
   row = this.row + mm.top;
   column = this.column + mm.left;
   
-  if (tetris.debug.graphics) {
+  if (tetris.debug.math) {
     console.log("Minimized matrix:");
     log_matrix(mm.matrix);
   }
   
   if (direction == LEFT) {
     if ((column - 1) < 0) { /* would take us to the left of the board */
-      if (tetris.debug.graphics)
+      if (tetris.debug.math)
         console.log("  Tetrimino->check_collisions(" + directions[direction] + "): collision with board detected");
       
       result = 1;
@@ -443,15 +326,15 @@ Tetrimino.prototype.check_collisions = function(direction) {
       for (i = row, j = (row + mm.height); i < j; i++)
         against.push(tetris.world.board.matrix[i].slice(column - 1, column - 1 + mm.width));
       
-      if (tetris.debug.graphics) {
+      if (tetris.debug.math) {
         console.log("Comparison matrix:");
         log_matrix(against);
       }
       
-      sum = this.matrix_sum(mm.matrix, against);
+      sum = matrix_sum(mm.matrix, against);
       
       for (i = 0, j = sum.length; i < j; i++) {
-        for (k = 0, k = sum[i].length; k < l; k++) {
+        for (k = 0, l = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 1;
             break;
@@ -464,7 +347,7 @@ Tetrimino.prototype.check_collisions = function(direction) {
     }
   } else if (direction == RIGHT) {
     if ((column + 1 + mm.width) > tetris.world.board.matrix[0].length) { /* would take us to the right of the board */
-      if (tetris.debug.graphics)
+      if (tetris.debug.math)
         console.log("  Tetrimino->check_collisions(" + directions[direction] + "): collision with board detected");
       
       result = 1;
@@ -472,15 +355,15 @@ Tetrimino.prototype.check_collisions = function(direction) {
       for (i = row, j = (row + mm.height); i < j; i++)
         against.push(tetris.world.board.matrix[i].slice(column + 1, column + 1 + mm.width));
       
-      if (tetris.debug.graphics) {
+      if (tetris.debug.math) {
         console.log("Comparison matrix:");
         log_matrix(against);
       }
       
-      sum = this.matrix_sum(mm.matrix, against);
+      sum = matrix_sum(mm.matrix, against);
       
       for (i = 0, j = sum.length; i < j; i++) {
-        for (k = 0, k = sum[i].length; k < l; k++) {
+        for (k = 0, l = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 1;
             break;
@@ -493,7 +376,7 @@ Tetrimino.prototype.check_collisions = function(direction) {
     }
   } else if (direction == DOWN) {
     if ((row + 1 + mm.height) > tetris.world.board.matrix.length) { /* would take us below the board */
-      if (tetris.debug.graphics)
+      if (tetris.debug.math)
         console.log("  Tetrimino->check_collisions(" + directions[direction] + "): collision with board detected");
       
       result = 2;
@@ -501,15 +384,20 @@ Tetrimino.prototype.check_collisions = function(direction) {
       for (i = (row + 1), j = (row + 1 + mm.height); i < j; i++)
         against.push(tetris.world.board.matrix[i].slice(column, column + mm.width));
       
-      if (tetris.debug.graphics) {
+      if (tetris.debug.math) {
         console.log("Comparison matrix:");
         log_matrix(against);
       }
       
-      sum = this.matrix_sum(mm.matrix, against);
+      sum = matrix_sum(mm.matrix, against);
+      
+      if (tetris.debug.math) {
+        console.log("Summation matrix:");
+        log_matrix(sum);
+      }
       
       for (i = 0, j = sum.length; i < j; i++) {
-        for (k = 0, k = sum[i].length; k < l; k++) {
+        for (k = 0, l = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 2;
             break;
@@ -519,6 +407,9 @@ Tetrimino.prototype.check_collisions = function(direction) {
         if (result != 0)
           break;
       }
+      
+      if (tetris.debug.math)
+        console.log("Summation result: " + result);
     }
   } else if (direction == ROTATE) {
     if ((column < 0) || ((column + mm.width) > tetris.world.board.matrix[0].length) || ((row + mm.height) > tetris.world.board.matrix.length)) {
@@ -530,15 +421,15 @@ Tetrimino.prototype.check_collisions = function(direction) {
       for (i = row, j = (row + mm.height); i < j; i++)
         against.push(tetris.world.board.matrix[i].slice(column, column + mm.width));
       
-      if (tetris.debug.graphics) {
+      if (tetris.debug.math) {
         console.log("Comparison matrix:");
         log_matrix(against);
       }
       
-      sum = this.matrix_sum(mm.matrix, against);
+      sum = matrix_sum(mm.matrix, against);
       
       for (i = 0, j = sum.length; i < j; i++) {
-        for (k = 0, k = sum[i].length; k < l; k++) {
+        for (k = 0, l = sum[i].length; k < l; k++) {
           if (sum[i][k] >= 2) {
             result = 2;
             break;
@@ -550,7 +441,7 @@ Tetrimino.prototype.check_collisions = function(direction) {
       }
     }
   } else { /* shit went haywire and we're trying a direction we shouldnt */
-    if (tetris.debug.graphics)
+    if (tetris.debug.math)
       console.log("  Tetriminos->check_collisions(" + directions[direction] + "): unhandled direction");
     
     result = 1; /* this will keep us from moving anywhere, but not do anything else */
@@ -562,6 +453,9 @@ Tetrimino.prototype.check_collisions = function(direction) {
 
 Tetrimino.prototype.can_move = function(direction) {
   var result;
+  
+  if (tetris.collided)
+    return 1;
   
   result = this.check_collisions(direction);
   
@@ -581,7 +475,9 @@ Tetrimino.prototype.move = function(direction) {
     console.log("  Tetrimino->move(" + directions[direction] + ")");
   
   if (this.can_move(direction) != 0) {
-    tetris.sound_play("woosh");
+    if (!tetris.collided)
+      tetris.sound_play("woosh");
+    
     return false;
   }
   
@@ -698,16 +594,7 @@ tetris.build_world = function() {
       }
     }
   }
-/*
-  if (tetris.debug.graphics) {
-    var str = '';
 
-    for (row = 0; row < 22; row++)
-      str += (matrix[row].toString()).split(", ").join(" ") + "\r\n";
-
-    console.log(str);
-  }
-*/
   if (tetris.debug.graphics)
     log_matrix(matrix);
 
@@ -717,6 +604,8 @@ tetris.build_world = function() {
   
   tetris.init_preview();
   tetris.init_scoreboard();
+  
+  tetris.world.board.matrix = $.extend(true, [], empty_board);
   
   /* world.board refers to the actual playing area */
   tetris.world.board.container = new createjs.Container();
@@ -757,10 +646,10 @@ tetris.init_scoreboard = function() {
   tetris.world.scoreboard.container.x = 416;
   tetris.world.scoreboard.container.y = 46;
 
-  tetris.world.scoreboard.score = new createjs.Text("Score: 000,000", "bold 20px Tahoma", "#80c080");
+  tetris.world.scoreboard.score = new createjs.Text("Score: 0", "bold 20px Tahoma", "#80c080");
   tetris.world.scoreboard.score.textBaseline = "alphabetic";
   
-  tetris.world.scoreboard.highscore = new createjs.Text("High: 000,000", "bold 14px Tahoma", "#80c080");
+  tetris.world.scoreboard.highscore = new createjs.Text("High: 0", "bold 14px Tahoma", "#80c080");
   tetris.world.scoreboard.highscore.textBaseline = "alphabetic";
   tetris.world.scoreboard.highscore.y = 20;
   
@@ -773,6 +662,21 @@ tetris.init_scoreboard = function() {
   tetris.world.scoreboard.container.addChild(tetris.world.scoreboard.level);
   
   tetris.stage.addChild(tetris.world.scoreboard.container);
+};
+
+
+tetris.world.scoreboard.update_score = function() {
+  tetris.world.scoreboard.score.text = "Score: " + tetris.score.toString();
+};
+
+
+tetris.world.scoreboard.update_highscore = function() {
+  tetris.world.scoreboard.highscore.text = "High: " + tetris.highscore.toString();
+};
+
+
+tetris.world.scoreboard.update_level = function() {
+  tetris.world.scoreboard.level.text = "Level: " + tetris.level.toString();
 };
 
 
