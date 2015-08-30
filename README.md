@@ -4,6 +4,8 @@ This is a Tetris clone for the web, using JavaScript as its' backbone and the
 HTML canvas as its render surface.  To aid in the manipulation of the canvas
 and audio system, CreateJS and their corresponding libraries were used.
 
+It's still very basic, and needs some polishing, but it does the job.
+
 ### My personal thoughts and opinions regarding CreateJS:
 
 All together, it took about 4 days to complete.  This includes time spent on:
