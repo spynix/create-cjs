@@ -44,6 +44,8 @@ tetris.controls.pausebreak = function(press) {
     
     if (tetris.debug.controls)
       console.log("KEYDOWN: Pause Break");
+    
+    tetris.pause();
   } else {
     tetris.controls.pressing.pausebreak = false;
     
@@ -157,6 +159,8 @@ tetris.controls.w = function(press) {
     
     if (tetris.debug.controls)
       console.log("KEYDOWN: W");
+    
+    tetris.world.board.rotate(true);
   } else {
     tetris.controls.pressing.w = false;
     
@@ -172,6 +176,8 @@ tetris.controls.s = function(press) {
     
     if (tetris.debug.controls)
       console.log("KEYDOWN: S");
+    
+    tetris.world.board.move(DOWN);
   } else {
     tetris.controls.pressing.s = false;
     
@@ -187,6 +193,8 @@ tetris.controls.a = function(press) {
     
     if (tetris.debug.controls)
       console.log("KEYDOWN: A");
+    
+    tetris.world.board.move(LEFT);
   } else {
     tetris.controls.pressing.a = false;
     
@@ -202,6 +210,8 @@ tetris.controls.d = function(press) {
     
     if (tetris.debug.controls)
       console.log("KEYDOWN: D");
+    
+    tetris.world.board.move(RIGHT);
   } else {
     tetris.controls.pressing.d = false;
     
@@ -217,6 +227,8 @@ tetris.controls.n = function(press) {
     
     if (tetris.debug.controls)
       console.log("KEYDOWN: N");
+    
+    tetris.new_game();
   } else {
     tetris.controls.pressing.n = false;
     
