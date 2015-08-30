@@ -27,16 +27,16 @@ different way of doing things.
 
 Anyway, the idea of writing more graphically complex games in CreateJS was ruled
 out by myself by "educated guess" based on my work through this project, but was
-also unequivocally rejected by my friend who also highly skilled in both web and
+also unequivocally rejected by my friend who is highly skilled in both web and
 game development.
 
 Tetris is a very simple game graphically, and as such I didn't need anything
 overly complicated.  He however, began with a "real" game, and very quickly
 realized all of the functionality he needed to make it look, feel, and flow like
-it should, CreateJS just didn't have it where it counted.
+it should... well... CreateJS just didn't have it where it counted.
 
 I guess the analogy is something like this: CreateJS provides you with all the
 norms.  Power locks, power windows, etc.  It's a normal car.  Nothing truly
 special, nothing really terrible, and it gets you from A to B while providing
-you with working A/C.  It's not a muscle car.  If you want to go fast, you have
-to get a muscle car.
+you with working A/C.  It's not a muscle car though and if you want to go fast,
+you have to get a muscle car.
