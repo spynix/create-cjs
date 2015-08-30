@@ -4,7 +4,7 @@ var tetris = tetris || {};
 
 tetris.debug = tetris.debug || {};
 tetris.debug.audio = tetris.debug.audio || false;
-tetris.debug.graphics = tetris.debug.graphics || true;
+tetris.debug.graphics = tetris.debug.graphics || false;
 tetris.debug.controls = tetris.debug.controls || false;
 tetris.debug.math = tetris.debug.math || false;
 
@@ -21,6 +21,7 @@ tetris.sounds = tetris.sounds || {};
 tetris.world = tetris.world || {};
 tetris.world.board = tetris.world.board || {};
 tetris.world.board.matrix = tetris.world.board.matrix || [];
+tetris.world.board.blocks = tetris.world.board.blocks || [];
 
 
 tetris.config.paths = {
@@ -154,7 +155,7 @@ var points = [
 ];
 
 
-tetris.world.board.matrix = [
+var empty_board = [
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
   [0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
