@@ -19,5 +19,5 @@ tetris.init = function() {
   
   tetris.keyboard_binds();
   
-  tetris.dev_binds();
+//  tetris.dev_binds();
 };
