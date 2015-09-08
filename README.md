@@ -33,4 +33,4 @@ you have to get a muscle car.
 That said, I was fairly happy with SoundJS and PreloadJS.  I didn't make
 extensive use of the libraries, but for what I wanted to do it was relatively
 easy to make it do it.  I wasn't fond of Preload's naming conventions but I was
-pleased with the core design.
+rather pleased with the API.
